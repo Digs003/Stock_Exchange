@@ -1,14 +1,79 @@
 /* eslint-disable @next/next/no-img-element */
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Ticker } from "../utils/types";
 import { getTicker } from "../utils/exchange_server";
+import { SignalingManager } from "../utils/SignalingManager";
 
 export const MarketBar = ({ market }: { market: string }) => {
   const [ticker, setTicker] = useState<Ticker | null>(null);
+  const netDirectionRef = useRef<number>(0);
 
   useEffect(() => {
     getTicker(market).then(setTicker);
+    SignalingManager.getInstance().registerCallback(
+      "ticker",
+      (data: Partial<Ticker>) =>
+        setTicker((prevTicker) => {
+          const symbol = data?.symbol ?? prevTicker?.symbol ?? "";
+          const firstPrice = data?.firstPrice ?? prevTicker?.firstPrice ?? "";
+          const lastPrice = data?.lastPrice ?? prevTicker?.lastPrice ?? "";
+          const high = data?.high ?? prevTicker?.high ?? "";
+          const low = data?.low ?? prevTicker?.low ?? "";
+          const volume = data?.volume ?? prevTicker?.volume ?? "";
+          const quoteVolume =
+            data?.quoteVolume ?? prevTicker?.quoteVolume ?? "";
+          const trades = data?.trades ?? prevTicker?.trades ?? "";
+
+          if (data?.lastPrice && prevTicker?.lastPrice) {
+            netDirectionRef.current =
+              parseFloat(data?.lastPrice) - parseFloat(prevTicker?.lastPrice);
+          }
+
+          const priceChange =
+            lastPrice && firstPrice
+              ? (parseFloat(lastPrice) - parseFloat(firstPrice)).toFixed(2)
+              : prevTicker?.priceChange ?? "";
+
+          const priceChangePercent =
+            lastPrice && firstPrice
+              ? (
+                  ((parseFloat(lastPrice) - parseFloat(firstPrice)) /
+                    parseFloat(firstPrice)) *
+                  100
+                ).toFixed(2)
+              : prevTicker?.priceChangePercent ?? "";
+
+          return {
+            symbol,
+            firstPrice,
+            lastPrice,
+            priceChange,
+            priceChangePercent,
+            high,
+            low,
+            volume,
+            quoteVolume,
+            trades,
+          };
+        }),
+      `TICKER-${market}` // Register the callback for the specific market
+    );
+    SignalingManager.getInstance().sendMessage({
+      method: "SUBSCRIBE",
+      params: [`ticker.${market}`],
+    });
+
+    return () => {
+      SignalingManager.getInstance().deregisterCallback(
+        "ticker",
+        `TICKER-${market}`
+      ); // Deregister the callback when the component unmounts
+      SignalingManager.getInstance().sendMessage({
+        method: "UNSUBSCRIBE",
+        params: [`ticker.${market}`],
+      });
+    };
   }, [market]);
 
   return (
@@ -19,7 +84,13 @@ export const MarketBar = ({ market }: { market: string }) => {
           <div className="flex items-center flex-row space-x-8 pl-4">
             <div className="flex flex-col h-full justify-center">
               <p
-                className={`font-medium tabular-nums text-greenText text-md text-green-500`}
+                className={`font-medium tabular-nums text-greenText text-md
+                   ${
+                     netDirectionRef.current >= 0
+                       ? "text-green-500"
+                       : "text-red-500"
+                   }
+                  `}
               >
                 ${ticker?.lastPrice}
               </p>
