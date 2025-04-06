@@ -1,6 +1,6 @@
 export const AskTable = ({ asks }: { asks: [string, string][] }) => {
   let curr_total = 0;
-  const recent_asks = asks.slice(0, 15);
+  const recent_asks = asks.slice(0, 10);
 
   const ask_rows: [string, string, number][] = [];
   for (const ask of recent_asks) {
@@ -15,7 +15,7 @@ export const AskTable = ({ asks }: { asks: [string, string][] }) => {
     0
   );
   return (
-    <div>
+    <div className="space-y-1">
       {ask_rows.map(([price, size, total]) => (
         <Ask
           sumTotal={sumTotal}
@@ -40,6 +40,9 @@ function Ask({
   size: string;
   total: number;
 }) {
+  const totalPercentage = (total / sumTotal) * 100;
+  const sizePercentage = (Number(size) / sumTotal) * 100;
+
   return (
     <div
       style={{
@@ -48,23 +51,42 @@ function Ask({
         width: "100%",
         backgroundColor: "transparent",
         overflow: "hidden",
+        padding: "4px 0",
+        height: "20px",
       }}
     >
+      {/* Total value bar */}
       <div
         style={{
           position: "absolute",
           top: 0,
           left: 0,
-          width: `${(100 * total) / sumTotal}%`,
+          width: `${totalPercentage}%`,
           height: "100%",
-          background: "rgba(228, 75, 68, 0.325)",
+          background: "rgba(228, 75, 68, 0.25)",
           transition: "width 0.3s ease-in-out",
+          zIndex: 1,
         }}
       ></div>
-      <div className="flex justify-between text-xs w-full">
-        <div>{price}</div>
+
+      {/* Size percentage bar */}
+      <div
+        style={{
+          position: "absolute",
+          top: 0,
+          left: 0,
+          width: `${sizePercentage}%`,
+          height: "100%",
+          background: "rgba(228, 75, 68, 0.5)",
+          transition: "width 0.3s ease-in-out",
+          zIndex: 2,
+        }}
+      ></div>
+
+      <div className="flex justify-between text-xs w-full z-10 relative px-2">
+        <div className="font-medium text-red-500">{price}</div>
         <div>{size}</div>
-        <div>{total?.toFixed(2)}</div>
+        <div className="font-medium">{total.toFixed(2)}</div>
       </div>
     </div>
   );

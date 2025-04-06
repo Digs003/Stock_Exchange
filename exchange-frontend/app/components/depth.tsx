@@ -1,16 +1,17 @@
 "use client";
 import { useEffect, useState } from "react";
-import { getDepth, getTicker, getTrade } from "@/app/utils/exchange_server";
+import { getDepth, getTicker } from "@/app/utils/exchange_server";
 import { AskTable } from "./AskTable";
 import { BidTable } from "./BidTable";
 import { SignalingManager } from "@/app/utils/SignalingManager";
-import { Depth, Ticker } from "@/app/utils/types";
+import type { Depth, Ticker } from "@/app/utils/types";
+
 function TableHeader() {
   return (
-    <div className="flex justify-between text-xs">
-      <div className="text-white">Price</div>
-      <div className="text-slate-500">Size</div>
-      <div className="text-slate-500">Total</div>
+    <div className="flex justify-between text-xs px-2 py-2 border-b border-gray-800 mb-2">
+      <div className="text-white font-semibold">Price (USDC)</div>
+      <div className="text-slate-400">Size (SOL)</div>
+      <div className="text-slate-400">Total (SOL)</div>
     </div>
   );
 }
@@ -19,28 +20,45 @@ export function Depth({ market }: { market: string }) {
   const [bids, setBids] = useState<[string, string][]>();
   const [asks, setAsks] = useState<[string, string][]>();
   const [price, setPrice] = useState<string>();
+  const [bidPercentage, setBidPercentage] = useState<number>(50);
+  const [askPercentage, setAskPercentage] = useState<number>(50);
 
   useEffect(() => {
     getDepth(market).then((data) => {
       setBids(data.bids.reverse());
       setAsks(data.asks);
+      calculatePercentages(data.bids, data.asks);
     });
+
     getTicker(market).then((data) => {
       setPrice(data.lastPrice);
     });
+
     // Register the callback for depth updates
     SignalingManager.getInstance().registerCallback(
       "depth",
       (data: Partial<Depth>) => {
         setBids((prevbids) => {
-          return updateOrderBook(prevbids ?? [], data?.bids ?? []);
+          const updatedBids = updateOrderBook(prevbids ?? [], data?.bids ?? []);
+          return updatedBids;
         });
+
         setAsks((prevasks) => {
-          return updateOrderBook(prevasks ?? [], data?.asks ?? []).reverse();
+          const updatedAsks = updateOrderBook(
+            prevasks ?? [],
+            data?.asks ?? []
+          ).reverse();
+          return updatedAsks;
         });
+
+        // Calculate percentages when data updates
+        if (data?.bids && data?.asks) {
+          calculatePercentages(data.bids, data.asks);
+        }
       },
       `DEPTH-${market}`
     );
+
     // Subscribe to the depth updates
     SignalingManager.getInstance().sendMessage({
       method: "SUBSCRIBE",
@@ -71,16 +89,56 @@ export function Depth({ market }: { market: string }) {
         `TICKER-${market}`
       );
     };
-
-    //Trades
   }, [market]);
 
+  // Calculate bid/ask percentages
+  const calculatePercentages = (
+    bids: [string, string][],
+    asks: [string, string][]
+  ) => {
+    const bidVolume = bids.reduce(
+      (acc, [_, size]) => acc + Number.parseFloat(size),
+      0
+    );
+    const askVolume = asks.reduce(
+      (acc, [_, size]) => acc + Number.parseFloat(size),
+      0
+    );
+    const totalVolume = bidVolume + askVolume;
+
+    if (totalVolume > 0) {
+      setBidPercentage(Math.round((bidVolume / totalVolume) * 100));
+      setAskPercentage(Math.round((askVolume / totalVolume) * 100));
+    }
+  };
+
   return (
-    <div>
+    <div className="bg-gray-900 rounded-lg overflow-hidden border border-gray-800">
       <TableHeader />
-      {asks && <AskTable asks={asks} />}
-      {price && <div>{price}</div>}
-      {bids && <BidTable bids={bids} />}
+      <div className="px-1">{asks && <AskTable asks={asks} />}</div>
+
+      {price && (
+        <div className="text-center py-2 border-t border-b border-gray-800 font-bold text-lg">
+          {price}
+        </div>
+      )}
+
+      <div className="px-1">{bids && <BidTable bids={bids} />}</div>
+
+      <div className="flex w-full h-8 mt-2">
+        <div
+          className="bg-green-600 flex items-center justify-center text-white font-medium"
+          style={{ width: `${bidPercentage}%` }}
+        >
+          {bidPercentage}%
+        </div>
+        <div
+          className="bg-red-600 flex items-center justify-center text-white font-medium"
+          style={{ width: `${askPercentage}%` }}
+        >
+          {askPercentage}%
+        </div>
+      </div>
     </div>
   );
 }
@@ -91,12 +149,14 @@ function updateOrderBook(
 ): [string, string][] {
   const levelMap = new Map(prevLevels);
   for (const [price, size] of newLevels) {
-    if (parseFloat(size) === 0) {
+    if (Number.parseFloat(size) === 0) {
       levelMap.delete(price);
     } else {
       levelMap.set(price, size);
     }
   }
   const updatedLevels = Array.from(levelMap.entries());
-  return updatedLevels.sort((a, b) => parseFloat(b[0]) - parseFloat(a[0]));
+  return updatedLevels.sort(
+    (a, b) => Number.parseFloat(b[0]) - Number.parseFloat(a[0])
+  );
 }
