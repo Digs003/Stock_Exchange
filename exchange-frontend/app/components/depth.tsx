@@ -113,12 +113,12 @@ export function Depth({ market }: { market: string }) {
   };
 
   return (
-    <div className="bg-gray-900 rounded-lg overflow-hidden border border-gray-800">
+    <div className="bg-[rgb(20,21,27)] rounded-lg overflow-hidden mx-1.5 my-2">
       <TableHeader />
       <div className="px-1">{asks && <AskTable asks={asks} />}</div>
 
       {price && (
-        <div className="text-center py-2 border-t border-b border-gray-800 font-bold text-lg">
+        <div className="text-center py-1 my-1.5 border-t border-b border-gray-800 font-bold text-[16px]">
           {price}
         </div>
       )}
@@ -127,13 +127,13 @@ export function Depth({ market }: { market: string }) {
 
       <div className="flex w-full h-8 mt-2">
         <div
-          className="bg-green-600 flex items-center justify-center text-white font-medium"
+          className="bg-[rgba(0,194,120,0.5)] flex items-center justify-center text-green-400 font-bold"
           style={{ width: `${bidPercentage}%` }}
         >
           {bidPercentage}%
         </div>
         <div
-          className="bg-red-600 flex items-center justify-center text-white font-medium"
+          className="bg-[rgba(234,56,59,.5)] flex items-center justify-center text-red-400 font-bold"
           style={{ width: `${askPercentage}%` }}
         >
           {askPercentage}%

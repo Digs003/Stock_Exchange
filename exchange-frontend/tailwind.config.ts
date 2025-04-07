@@ -21,7 +21,7 @@ const config: Config = {
       },
       borderColor: {
         redBorder: "rgba(234,56,59,.5)",
-        greenBorder: "rgba(0,194,120,.4)",
+        greenBorder: "rgba(0, 194, 120, 0.4)",
         baseBorderMed: "#cccccc",
         accentBlue: "rgb(76,148,255)",
         baseBorderLight: "rgb(32,33,39)",
