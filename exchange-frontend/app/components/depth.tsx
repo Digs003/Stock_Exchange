@@ -97,10 +97,12 @@ export function Depth({ market }: { market: string }) {
     asks: [string, string][]
   ) => {
     const bidVolume = bids.reduce(
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       (acc, [_, size]) => acc + Number.parseFloat(size),
       0
     );
     const askVolume = asks.reduce(
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       (acc, [_, size]) => acc + Number.parseFloat(size),
       0
     );
