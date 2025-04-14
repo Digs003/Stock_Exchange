@@ -5,6 +5,7 @@ export function SwapUI({ market }: { market: string }) {
   const [amount, setAmount] = useState("");
   const [activeTab, setActiveTab] = useState("buy");
   const [type, setType] = useState("limit");
+  const baseAsset = market.split("_")[0];
 
   return (
     <div className="w-full">
@@ -66,7 +67,7 @@ export function SwapUI({ market }: { market: string }) {
                 />
                 <div className="flex flex-row absolute right-1 top-1 p-2">
                   <div className="relative">
-                    <img src="/sol.webp" className="w-6 h-6" />
+                    <img src={`/${baseAsset}.webp`} className="w-6 h-6" />
                   </div>
                 </div>
               </div>

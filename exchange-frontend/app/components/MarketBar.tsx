@@ -148,6 +148,7 @@ export const MarketBar = ({ market }: { market: string }) => {
 };
 
 function Ticker({ market }: { market: string }) {
+  const baseAsset = market.split("_")[0];
   return (
     <div className="flex h-[60px] shrink-0 space-x-4">
       <div className="flex flex-row relative ml-2 -mr-4">
@@ -157,7 +158,7 @@ function Ticker({ market }: { market: string }) {
           decoding="async"
           data-nimg="1"
           className="z-10 rounded-full h-6 w-6 mt-4 outline-baseBackgroundL1"
-          src="/sol.webp"
+          src={`/${baseAsset}.webp`}
         />
         <img
           alt="USDC Logo"
