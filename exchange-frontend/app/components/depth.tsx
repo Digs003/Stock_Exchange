@@ -62,7 +62,7 @@ export function Depth({ market }: { market: string }) {
     // Subscribe to the depth updates
     SignalingManager.getInstance().sendMessage({
       method: "SUBSCRIBE",
-      params: [`depth.200ms.${market}`],
+      params: [`depth@${market}`],
     });
 
     // Register the callback for ticker updates
@@ -78,7 +78,7 @@ export function Depth({ market }: { market: string }) {
       // Unsubscribe from the depth updates
       SignalingManager.getInstance().sendMessage({
         method: "UNSUBSCRIBE",
-        params: [`depth.200ms.${market}`],
+        params: [`depth@${market}`],
       });
       SignalingManager.getInstance().deregisterCallback(
         "depth",

@@ -7,7 +7,7 @@ export function SwapUI({ market }: { market: string }) {
   const [type, setType] = useState("limit");
 
   return (
-    <div>
+    <div className="w-full">
       <div className="flex flex-col">
         <div className="flex flex-row h-[60px]">
           <BuyButton activeTab={activeTab} setActiveTab={setActiveTab} />

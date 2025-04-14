@@ -27,7 +27,7 @@ export type MessageToEngine =
   | {
       type: typeof ON_RAMP;
       payload: {
-        market: string;
+        amount: string;
         txnId: string;
         userId: string;
       };
