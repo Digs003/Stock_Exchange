@@ -1,6 +1,6 @@
 export const AskTable = ({ asks }: { asks: [string, string][] }) => {
   let curr_total = 0;
-  const recent_asks = asks.slice(0, 10);
+  const recent_asks = asks.slice(0, 9);
 
   const ask_rows: [string, string, number][] = [];
   for (const ask of recent_asks) {

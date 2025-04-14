@@ -1,6 +1,6 @@
 export const BidTable = ({ bids }: { bids: [string, string][] }) => {
   let curr_total = 0;
-  const recent_bids = bids.slice(0, 10);
+  const recent_bids = bids.slice(0, 9);
 
   const bid_rows: [string, string, number][] = [];
   for (const bid of recent_bids) {
