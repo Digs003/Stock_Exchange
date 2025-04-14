@@ -60,7 +60,7 @@ export default function Page() {
       </div>
       <div className="w-[1px] flex-col border-slate-800 border-l"></div>
       <div>
-        <div className="flex flex-col w-[250px]">
+        <div className="flex flex-col w-[245px]">
           <SwapUI market={market as string} />
         </div>
       </div>

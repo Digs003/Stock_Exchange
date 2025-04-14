@@ -62,7 +62,7 @@ function Bid({
           left: 0,
           width: `${totalPercentage}%`,
           height: "100%",
-          background: "rgba(1, 167, 129, 0.25)",
+          background: "rgba(0,194,120,.12)",
           transition: "width 0.3s ease-in-out",
           zIndex: 1,
         }}
@@ -76,14 +76,14 @@ function Bid({
           left: 0,
           width: `${sizePercentage}%`,
           height: "100%",
-          background: "rgba(1, 167, 129, 0.5)",
+          background: "rgba(0,194,120,.4)",
           transition: "width 0.3s ease-in-out",
           zIndex: 2,
         }}
       ></div>
 
       <div className="flex justify-between text-xs w-full z-10 relative px-2">
-        <div className="font-medium text-green-500">{price}</div>
+        <div className="font-medium text-green-400 font-semibold">{price}</div>
         <div>{size}</div>
         <div className="font-medium">{total.toFixed(2)}</div>
       </div>
