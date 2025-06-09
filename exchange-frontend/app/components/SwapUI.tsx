@@ -1,11 +1,31 @@
 "use client";
 import { useState } from "react";
+import axios from "axios";
+import { BASE_URL } from "../utils/exchange_server";
 
 export function SwapUI({ market }: { market: string }) {
-  const [amount, setAmount] = useState("");
+  const [price, setPrice] = useState("134.38");
+  const [quantity, setQuantity] = useState("123");
+
   const [activeTab, setActiveTab] = useState("buy");
   const [type, setType] = useState("limit");
   const baseAsset = market.split("_")[0];
+  const quoteAsset = market.split("_")[1];
+
+  const handleOrder = async () => {
+    try {
+      const res = await axios.post(`${BASE_URL}/order`, {
+        market,
+        price,
+        quantity,
+        side: activeTab,
+        userId: "1",
+      });
+      console.log("Order Success:", res.data);
+    } catch (err) {
+      console.error("Order Error:", err);
+    }
+  };
 
   return (
     <div className="w-full">
@@ -43,11 +63,12 @@ export function SwapUI({ market }: { market: string }) {
                     placeholder="0"
                     className="h-12 rounded-lg border-2 border-solid border-[rgb(32,33,39)] bg-[var(--background)] pr-12 text-right text-2xl leading-9 text-[$text] placeholder-baseTextMedEmphasis ring-0 transition focus:border-[rgb(76,148,255)] focus:ring-0"
                     type="text"
-                    value="134.38"
+                    value={price}
+                    onChange={(e) => setPrice(e.target.value)}
                   />
                   <div className="flex flex-row absolute right-1 top-1 p-2">
                     <div className="relative">
-                      <img src="/usdc.webp" className="w-6 h-6" />
+                      <img src={`/${quoteAsset}.webp`} className="w-6 h-6" />
                     </div>
                   </div>
                 </div>
@@ -63,7 +84,8 @@ export function SwapUI({ market }: { market: string }) {
                   placeholder="0"
                   className="h-12 rounded-lg border-2 border-solid border-[rgb(32,33,39)] bg-[var(--background)] pr-12 text-right text-2xl leading-9 text-[$text] placeholder-baseTextMedEmphasis ring-0 transition focus:border-[rgb(76,148,255)] focus:ring-0"
                   type="text"
-                  value="123"
+                  value={quantity}
+                  onChange={(e) => setQuantity(e.target.value)}
                 />
                 <div className="flex flex-row absolute right-1 top-1 p-2">
                   <div className="relative">
@@ -93,10 +115,11 @@ export function SwapUI({ market }: { market: string }) {
             </div>
             <button
               type="button"
-              className="font-semibold  focus:ring-blue-200 focus:none focus:outline-none text-center h-12 rounded-xl text-base px-4 py-2 my-4 bg-[rgb(0,194,120)] text-[rgb(20,21,27)] active:scale-98"
+              className="font-semibold  focus:ring-blue-200 focus:none focus:outline-none text-center h-12 rounded-xl text-base px-4 py-2 my-4 bg-[rgb(0,194,120)]  text-[rgb(20,21,27)] active:scale-98"
               data-rac=""
+              onClick={handleOrder}
             >
-              Buy
+              {activeTab === "buy" ? "Buy" : "Sell"}
             </button>
             <div className="flex justify-between flex-row mt-1">
               <div className="flex flex-row gap-2">

@@ -1,15 +1,18 @@
 /* eslint-disable @next/next/no-img-element */
 "use client";
 import { useEffect, useState, useRef } from "react";
-import { Ticker } from "../utils/types";
-import { getTicker } from "../utils/exchange_server";
-import { SignalingManager } from "../utils/SignalingManager";
+import type { Ticker } from "@/app/utils/types";
+import { getTicker } from "@/app/utils/exchange_server";
+import { SignalingManager } from "@/app/utils/SignalingManager";
 
 export const MarketBar = ({ market }: { market: string }) => {
   const [ticker, setTicker] = useState<Ticker | null>(null);
   const netDirectionRef = useRef<number>(0);
 
+  const callbackKeyRef = useRef(`TICKER-${market}-${Math.random()}`);
+
   useEffect(() => {
+    const callbackKey = callbackKeyRef.current;
     getTicker(market).then(setTicker);
     SignalingManager.getInstance().registerCallback(
       "ticker",
@@ -57,7 +60,7 @@ export const MarketBar = ({ market }: { market: string }) => {
             trades,
           };
         }),
-      `TICKER-${market}` // Register the callback for the specific market
+      callbackKey // Register the callback for the specific market
     );
     SignalingManager.getInstance().sendMessage({
       method: "SUBSCRIBE",
@@ -65,10 +68,7 @@ export const MarketBar = ({ market }: { market: string }) => {
     });
 
     return () => {
-      SignalingManager.getInstance().deregisterCallback(
-        "ticker",
-        `TICKER-${market}`
-      ); // Deregister the callback when the component unmounts
+      SignalingManager.getInstance().deregisterCallback("ticker", callbackKey); // Deregister the callback when the component unmounts
       SignalingManager.getInstance().sendMessage({
         method: "UNSUBSCRIBE",
         params: [`ticker.${market}`],
@@ -149,6 +149,7 @@ export const MarketBar = ({ market }: { market: string }) => {
 
 function Ticker({ market }: { market: string }) {
   const baseAsset = market.split("_")[0];
+  const quoteAsset = market.split("_")[1];
   return (
     <div className="flex h-[60px] shrink-0 space-x-4">
       <div className="flex flex-row relative ml-2 -mr-4">
@@ -166,7 +167,7 @@ function Ticker({ market }: { market: string }) {
           decoding="async"
           data-nimg="1"
           className="h-6 w-6 -ml-2 mt-4 rounded-full"
-          src="/usdc.webp"
+          src={`/${quoteAsset}.webp`}
         />
       </div>
       <button type="button" className="react-aria-Button" data-rac="">

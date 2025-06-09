@@ -1,14 +1,13 @@
 import axios from "axios";
 import { Depth, Trade, Ticker, KLine } from "./types";
 
-const BASE_URL = "http://localhost:3020/api/v1";
-
+export const BASE_URL = "http://localhost:3020/api/v1";
+//export const BASE_URL = "http://localhost:3000/api/v1";
 export async function getDepth(market: string): Promise<Depth> {
   const response = await axios.get(`${BASE_URL}/depth?symbol=${market}`);
   if (response.status !== 200) {
     throw new Error(`Failed to fetch depth data: ${response.statusText}`);
   }
-  console.log(response.data);
   return response.data;
 }
 
