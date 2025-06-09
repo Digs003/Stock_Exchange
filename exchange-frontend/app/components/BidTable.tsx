@@ -83,7 +83,7 @@ function Bid({
       ></div>
 
       <div className="flex justify-between text-xs w-full z-10 relative px-2">
-        <div className="font-medium text-green-400 font-semibold">{price}</div>
+        <div className="font-semibold text-green-400">{price}</div>
         <div>{size}</div>
         <div className="font-medium">{total.toFixed(2)}</div>
       </div>

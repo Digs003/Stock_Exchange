@@ -27,7 +27,7 @@ export interface Ticker {
 }
 export interface KLine {
   start: string;
-  end: string;
+  end: number;
   open: string;
   high: string;
   low: string;

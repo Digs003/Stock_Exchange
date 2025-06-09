@@ -1,9 +1,11 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { ChartManager } from "../utils/ChartManager";
 import { getKLines } from "../utils/exchange_server";
 import { Button } from "@/app/components/ui/button";
+import { SignalingManager } from "../utils/SignalingManager";
+import { KLine } from "../utils/types";
 
 type TimeInterval = "1m" | "1h" | "1w";
 
@@ -35,46 +37,89 @@ export function TradeView({ market }: { market: string }) {
     return { startTime, endTime: now };
   };
 
-  const loadChartData = async (interval: TimeInterval) => {
-    setIsLoading(true);
-    try {
-      const { startTime, endTime } = getTimeRange(interval);
-      const klineData = await getKLines(market, interval, startTime, endTime);
+  const loadChartData = useCallback(
+    async (interval: TimeInterval) => {
+      setIsLoading(true);
+      try {
+        const { startTime, endTime } = getTimeRange(interval);
+        const klineData = await getKLines(market, interval, startTime, endTime);
 
-      if (chartRef.current) {
-        if (chartManagerRef.current) {
-          chartManagerRef.current.destroy();
+        if (chartRef.current) {
+          if (chartManagerRef.current) {
+            chartManagerRef.current.destroy();
+          }
+
+          const formattedData =
+            [
+              ...klineData?.map((x) => ({
+                close: Number.parseFloat(x.close),
+                high: Number.parseFloat(x.high),
+                low: Number.parseFloat(x.low),
+                open: Number.parseFloat(x.open),
+                timestamp: new Date(x.end),
+                volume: Number.parseFloat(x.volume),
+              })),
+            ].sort((x, y) => (x.timestamp < y.timestamp ? -1 : 1)) || [];
+
+          const chartManager = new ChartManager(
+            chartRef.current,
+            formattedData,
+            {
+              background: "#0e0f14",
+              color: "white",
+            }
+          );
+
+          chartManagerRef.current = chartManager;
         }
-
-        const formattedData =
-          [
-            ...klineData?.map((x) => ({
-              close: Number.parseFloat(x.close),
-              high: Number.parseFloat(x.high),
-              low: Number.parseFloat(x.low),
-              open: Number.parseFloat(x.open),
-              timestamp: new Date(x.end),
-              volume: Number.parseFloat(x.volume),
-            })),
-          ].sort((x, y) => (x.timestamp < y.timestamp ? -1 : 1)) || [];
-
-        const chartManager = new ChartManager(chartRef.current, formattedData, {
-          background: "#0e0f14",
-          color: "white",
-        });
-
-        chartManagerRef.current = chartManager;
+      } catch (error) {
+        console.error("Failed to load chart data:", error);
+      } finally {
+        setIsLoading(false);
       }
-    } catch (error) {
-      console.error("Failed to load chart data:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+    },
+    [market]
+  );
 
   useEffect(() => {
     loadChartData(selectedInterval);
-  }, [market, selectedInterval]);
+    SignalingManager.getInstance().registerCallback(
+      "kline",
+      (data: Partial<KLine>) => {
+        if (!chartManagerRef.current) return;
+        const newKLine = {
+          timestamp: new Date(data?.end ?? Date.now()),
+          open: Number.parseFloat(data?.open || "0"),
+          high: Number.parseFloat(data?.high || "0"),
+          low: Number.parseFloat(data?.low || "0"),
+          close: Number.parseFloat(data?.close || "0"),
+          volume: Number.parseFloat(data?.volume || "0"),
+        };
+
+        chartManagerRef.current.update(newKLine);
+      },
+      "KLINE-" + market + "-" + selectedInterval
+    );
+    SignalingManager.getInstance().sendMessage({
+      method: "SUBSCRIBE",
+      params: [`kline.${selectedInterval}.${market}`],
+    });
+
+    return () => {
+      if (chartManagerRef.current) {
+        chartManagerRef.current.destroy();
+        chartManagerRef.current = null;
+      }
+      SignalingManager.getInstance().deregisterCallback(
+        "kline",
+        "KLINE-" + market + "-" + selectedInterval
+      );
+      SignalingManager.getInstance().sendMessage({
+        method: "UNSUBSCRIBE",
+        params: [`kline.${selectedInterval}.${market}`],
+      });
+    };
+  }, [market, selectedInterval, loadChartData]);
 
   const handleIntervalChange = (interval: TimeInterval) => {
     setSelectedInterval(interval);

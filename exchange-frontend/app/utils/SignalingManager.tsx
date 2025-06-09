@@ -1,4 +1,4 @@
-import { Ticker, Depth, Trade } from "./types";
+import { Ticker, Depth, Trade, KLine } from "./types";
 
 export const BASE_URL = "wss://ws.backpack.exchange/";
 //export const BASE_URL = "ws://localhost:3001";
@@ -60,6 +60,17 @@ export class SignalingManager {
               isBuyerMaker: message.data.m,
             };
             callback(newTrade);
+          }
+          if (type === "kline") {
+            const newKLine: Partial<KLine> = {
+              close: message.data.c,
+              high: message.data.h,
+              low: message.data.l,
+              open: message.data.o,
+              volume: message.data.v,
+              end: message.data.T * 1000,
+            };
+            callback(newKLine);
           }
         });
       }

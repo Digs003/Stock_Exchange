@@ -84,7 +84,7 @@ function Ask({
       ></div>
 
       <div className="flex justify-between text-xs w-full z-10 relative px-2">
-        <div className="font-medium text-red-400 font-semibold">{price}</div>
+        <div className="text-red-400 font-semibold">{price}</div>
         <div>{size}</div>
         <div className="font-medium">{total.toFixed(2)}</div>
       </div>
