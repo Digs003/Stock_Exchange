@@ -7,7 +7,7 @@ const pgClient = new Client({
   host: "localhost",
   database: "my_database",
   password: "your_password",
-  port: 5432,
+  port: 55432,
 });
 
 pgClient.connect();

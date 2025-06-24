@@ -20,7 +20,7 @@ async function initializeDB() {
             currency_code   VARCHAR (10)
         );
         
-        SELECT create_hypertable('tata_prices', 'time', 'price', 2);
+        SELECT create_hypertable('tata_prices', 'time');
     `);
 
   await client.query(`

@@ -15,6 +15,7 @@ export const klineRouter = Router();
 
 klineRouter.get("/", async (req, res) => {
   const { market, interval, startTime, endTime } = req.query;
+  console.log({ market, interval, startTime, endTime });
 
   let query;
   switch (interval) {
@@ -46,6 +47,7 @@ klineRouter.get("/", async (req, res) => {
       new Date(Number(startTime) * 1000),
       new Date(Number(endTime) * 1000),
     ]);
+    console.log(result.rows);
     res.json(
       result.rows.map((x) => ({
         close: x.close,

@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 import axios from "axios";
-import { BASE_URL } from "../utils/exchange_server";
+import { BASE_URL } from "@/app/utils/exchange_server";
 
 export function SwapUI({ market }: { market: string }) {
   const [price, setPrice] = useState("134.38");

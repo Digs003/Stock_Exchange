@@ -124,6 +124,7 @@ export class Orderbook {
   matchAsk(order: Order): { fills: Fill[]; executedQty: number } {
     const fills: Fill[] = [];
     let executedQty = 0;
+    console.log(this.bids);
 
     for (let i = 0; i < this.bids.length; i++) {
       if (this.bids[i].price >= order.price && executedQty < order.quantity) {
@@ -154,7 +155,6 @@ export class Orderbook {
     };
   }
 
-  //TODO: Can you make this faster? Can you compute this during order matches?
   getDepth() {
     const bids: [string, string][] = [];
     const asks: [string, string][] = [];

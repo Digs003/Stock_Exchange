@@ -1,11 +1,11 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { ChartManager } from "../utils/ChartManager";
-import { getKLines } from "../utils/exchange_server";
+import { ChartManager } from "@/app/utils/ChartManager";
+import { getKLines } from "@/app/utils/exchange_server";
 import { Button } from "@/app/components/ui/button";
-import { SignalingManager } from "../utils/SignalingManager";
-import { KLine } from "../utils/types";
+import { SignalingManager } from "@/app/utils/SignalingManager";
+import { KLine } from "@/app/utils/types";
 
 type TimeInterval = "1m" | "1h" | "1w";
 
